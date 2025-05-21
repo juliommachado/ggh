@@ -23,10 +23,12 @@ const (
 )
 
 type model struct {
-	table  table.Model
-	choice config.SSHConfig
-	what   Selecting
-	exit   bool
+	table         table.Model
+	choice        config.SSHConfig
+	what          Selecting
+	exit          bool
+	action        string // New field
+	selectedIndex int    // New field
 }
 
 func (m model) Init() tea.Cmd { return nil }
@@ -44,10 +46,16 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			m.table, cmd = m.table.Update("") // Overrides default `d` behavior
 			return m, cmd
+		case "n": // New case for 'n'
+			m.action = "edit"
+			m.selectedIndex = m.table.Cursor()
+			return m, tea.Quit
 		case "q", "ctrl+c", "esc":
+			m.action = "quit"
 			m.exit = true
 			return m, tea.Quit
 		case "enter":
+			m.action = "connect"
 			m.choice = setConfig(m.table.SelectedRow(), m.what)
 			return m, tea.Quit
 		}
@@ -57,11 +65,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func setConfig(row table.Row, what Selecting) config.SSHConfig {
+	// Nickname is row[1], but not used in SSHConfig for generating command args
 	return config.SSHConfig{
-		Host: row[1],
-		Port: row[2],
-		User: row[3],
-		Key:  row[4],
+		Host: row[2],
+		Port: row[3],
+		User: row[4],
+		Key:  row[5],
 	}
 }
 
@@ -72,7 +81,7 @@ func (m model) View() string {
 	return theme.BaseStyle.Render(m.table.View()) + "\n  " + m.HelpView() + "\n"
 }
 
-func Select(rows []table.Row, what Selecting) config.SSHConfig {
+func Select(rows []table.Row, what Selecting) (config.SSHConfig, string, int) {
 	var columns []table.Column
 	if what == SelectConfig {
 		columns = append(columns, []table.Column{
@@ -86,8 +95,9 @@ func Select(rows []table.Row, what Selecting) config.SSHConfig {
 
 	if what == SelectHistory {
 		columns = append(columns, []table.Column{
-			{Title: "Name", Width: 10},
-			{Title: "Host", Width: 15},
+			{Title: "Name", Width: 8},
+			{Title: "Nickname", Width: 10},
+			{Title: "Host", Width: 12},
 			{Title: "Port", Width: 4},
 			{Title: "User", Width: 10},
 			{Title: "Key", Width: 10},
@@ -116,15 +126,21 @@ func Select(rows []table.Row, what Selecting) config.SSHConfig {
 	}
 	// Assert the final tea.Model to our local model and print the choice.
 	if m, ok := m.(model); ok {
-		if m.choice.Host != "" {
-			return m.choice
+		switch m.action {
+		case "connect":
+			return m.choice, "connect", m.table.Cursor()
+		case "edit":
+			return config.SSHConfig{}, "edit", m.selectedIndex
+		case "quit":
+			return config.SSHConfig{}, "quit", -1
 		}
+		// Default case if action is not set, but exit is true (e.g. unexpected)
 		if m.exit {
-			os.Exit(0)
+			return config.SSHConfig{}, "quit", -1
 		}
 	}
-
-	return config.SSHConfig{}
+	// Should ideally not be reached if tea.Quit is always paired with an action
+	return config.SSHConfig{}, "quit", -1
 }
 func (m model) HelpView() string {
 
@@ -137,6 +153,7 @@ func (m model) HelpView() string {
 
 	if m.what == SelectHistory {
 		b.WriteString(generateHelpBlock("d", "delete", true))
+		b.WriteString(generateHelpBlock("n", "nickname", true)) // Add help for 'n'
 	}
 
 	b.WriteString(generateHelpBlock("q/esc", "quit", false))

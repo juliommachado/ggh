@@ -63,6 +63,7 @@ func Print() {
 	currentTime := time.Now()
 	for _, history := range list {
 		rows = append(rows, table.Row{history.Connection.Name,
+			history.Connection.Nickname, // Added
 			history.Connection.Host,
 			history.Connection.Port,
 			history.Connection.User,

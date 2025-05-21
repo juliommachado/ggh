@@ -129,3 +129,21 @@ func stringify(n SSHHistory, l []SSHHistory) string {
 
 	return string(content)
 }
+
+// SaveFullHistory saves the entire history list to the history file.
+// It overwrites the existing file with the provided list.
+func SaveFullHistory(list []SSHHistory) error {
+	file := getFileLocation() // Assumes getFileLocation() is accessible
+
+	content, err := json.Marshal(list) // Use json.Marshal for consistency
+	if err != nil {
+		return fmt.Errorf("failed to marshal history list: %w", err)
+	}
+
+	err = os.WriteFile(file, content, 0644)
+	if err != nil {
+		return fmt.Errorf("failed to write updated history to %s: %w", file, err)
+	}
+
+	return nil
+}

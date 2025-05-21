@@ -13,11 +13,12 @@ import (
 )
 
 type SSHConfig struct {
-	Name string `json:"name"`
-	Host string `json:"host"`
-	Port string `json:"port"`
-	User string `json:"user"`
-	Key  string `json:"key"`
+	Name     string `json:"name"`
+	Nickname string `json:"nickname"` // New field
+	Host     string `json:"host"`
+	Port     string `json:"port"`
+	User     string `json:"user"`
+	Key      string `json:"key"`
 }
 
 func Parse(configFile string) ([]SSHConfig, error) {

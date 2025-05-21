@@ -13,16 +13,25 @@ const (
 )
 
 func PrintTable(rows []table.Row, p Print) string {
-	columns := []table.Column{
-		{Title: "Name", Width: 10},
-		{Title: "Host", Width: 15},
-		{Title: "Port", Width: 10},
-		{Title: "User", Width: 10},
-		{Title: "Key", Width: 10},
-	}
-
+	var columns []table.Column
 	if p == PrintHistory {
-		columns = append(columns, table.Column{Title: "Last login", Width: 15})
+		columns = []table.Column{
+			{Title: "Name", Width: 8},
+			{Title: "Nickname", Width: 10},
+			{Title: "Host", Width: 12},
+			{Title: "Port", Width: 4},
+			{Title: "User", Width: 10},
+			{Title: "Key", Width: 10},
+			{Title: "Last login", Width: 15},
+		}
+	} else { // For PrintConfig
+		columns = []table.Column{
+			{Title: "Name", Width: 10},
+			{Title: "Host", Width: 15},
+			{Title: "Port", Width: 10},
+			{Title: "User", Width: 10},
+			{Title: "Key", Width: 10},
+		}
 	}
 
 	t := table.New(
