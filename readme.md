@@ -40,6 +40,16 @@ ggh -
 ggh - stage
 ggh - meta-servers
 
+### Managing Nicknames for History Entries
+GGH allows you to assign custom nicknames to your SSH session history for easier identification.
+- When you run `ggh` to open the interactive history list, a "Nickname" column will display any assigned nicknames.
+- **To add or edit a nickname**:
+    1. Run `ggh` to view your session history.
+    2. Use the arrow keys to highlight the desired session.
+    3. Press the 'n' key. You'll be prompted to enter a nickname.
+    4. Type the nickname and press Enter. If an old nickname existed, it will be updated.
+- Nicknames are stored locally in the `~/.ggh/history.json` file.
+
 # To get non-interactive list of history and config, run
 ggh --config
 ggh --history

@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 )
 
-func getFileLocation() string {
+var getFileLocation = func() string { // Changed to var
 	userHomeDir, err := os.UserHomeDir()
 
 	if err != nil {
